@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { body, validationResult } from "express-validator";
 import { RequestValidationError } from "../errors/request-validation-error";
+import { BadRequestError } from "../errors/bad-request-error";
 import { DatabaseConnectionError } from "../errors/database-connection-errors";
 
 import { User } from "../models/users";
@@ -33,8 +34,8 @@ router.post(
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      console.log("Email in Use");
-      return res.send({});
+      // console.log("Email in Use");
+      throw new BadRequestError("Email in Use");
     }
 
     const user = User.build({ email, password });

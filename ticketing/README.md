@@ -20,19 +20,30 @@ The auth service has a root controller for handling Signup, Signin, Signout, cur
   * With microservice setup which may use different language/frameworks, the error message generated from each microservice might have a very different structure --- it's a HUGE issue.
     
     * solution: each microservice should send a standard structure of the response to the front end app.
+    
 * Error handling
   * consistently structured response from all services is required -> Use Middleware to handle errors
   * Each of the error type should be handled consistently  -> Express's error handling mechanism (call the 'next' function) to capture all possible errors
   * Express custom error handlers have 4 function arguments: (err, req, res, next)
     
     > Epress will automatically count the number of arguments and it knows the handlers will handle the errors
+  
 * Async Error handling
   
   * use `express-async-errors` package with log errors from async/await request handlers
   * `import "express-async-errors";` statements goes after the express import
+  
 * One database per microservice: use Mongoose and MongoDB
   
   * DB is hosted and managed by a K8s Pod
+  
+* Middleware in Express
+
+  * Middleware/callback function expression needs to use `function` keyword only instead of arrow function.
+
+  * That’s because `this` in side the function will be pointing to the actual `user` object we are trying to save to the DB. If arrow function is used, `this` will be overwritten to the current context of the function, which is the `user.ts` file. ---> NOT OK!
+
+    
 
 ## MongoDB
 
@@ -55,11 +66,31 @@ Data types in Schema:
 
 * data types in TS interface/type is lowercase: such as `string`
 * in Mongoose, the data type is uppercase: `String` -- *referring to an actual constructor*
-* 
+
+`pre` method used with Mongoose Schema object.
+
+> `pre('save', cb)` method will be called when user.save() is called every time
+>
+> Inside the 
+
+```javascript
+
+```
+
+
+
+## Password Hashing
+
+Popular practice: place hashing logic directly into the User Model file.
+
+Our approach:
+
+1. Save the password hashing functions at a separate location `~/services/password.ts`
+2. 
 
 ## TS knowledge:
 
-* `private` keyword in constructor argument
+* `private` and `public` keyword in constructor argument
 ```javascript
 class TestClass {
   constructor(name: string, private address: string, public city) { }
@@ -94,3 +125,4 @@ console.log(testClass.city);
 
 * Generics in TS
   * Think of these `<T, U>` as being some arguments to the function of model
+* Tell TS to manually specify the type of the variable: `const buff = (await scryptAsync(*password*, salt, 64)) as Buffer`. Now the `buff` will be recognized as `Buffer` type
