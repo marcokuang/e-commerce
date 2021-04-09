@@ -3,6 +3,8 @@ import { body, validationResult } from "express-validator";
 import { RequestValidationError } from "../errors/request-validation-error";
 import { DatabaseConnectionError } from "../errors/database-connection-errors";
 
+import { User } from "../models/users";
+
 const router = express.Router();
 router.post(
   "/api/users/signup",
@@ -14,7 +16,7 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage("Password must be between 4 and 20 characters"),
   ],
-  (req: Request, res: Response) => {
+  async (req: Request, res: Response) => {
     // validationRequest function is called inside the request handler
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -28,9 +30,20 @@ router.post(
     // validate the email and password -- now use a libaray to provide the functionality
     const { email, password } = req.body;
 
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      console.log("Email in Use");
+      return res.send({});
+    }
+
+    const user = User.build({ email, password });
+    // save user to DB
+    await user.save();
+
     console.log("Creating a user now.");
-    throw new DatabaseConnectionError();
-    res.send({ message: "Created a user" });
+
+    res.status(201).send(user);
   }
 );
 
