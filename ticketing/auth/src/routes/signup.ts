@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
-import { body, validationResult } from "express-validator";
+import { body } from "express-validator";
 import jwt from "jsonwebtoken";
 
-import { RequestValidationError } from "../errors/request-validation-error";
+// import { RequestValidationError } from "../errors/request-validation-error";
 import { BadRequestError } from "../errors/bad-request-error";
 import { DatabaseConnectionError } from "../errors/database-connection-errors";
+import { validateRequest } from "../middlewares/validate-request";
 
 import { User } from "../models/users";
 
@@ -19,17 +20,20 @@ router.post(
       .isLength({ min: 4, max: 20 })
       .withMessage("Password must be between 4 and 20 characters"),
   ],
+  validateRequest,
   async (req: Request, res: Response) => {
     // validationRequest function is called inside the request handler
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      // set the error status to 400, and send an array of errors back to client as JSON data
+    // NOTE: the error handling logic is extracted to validateRequest middleware
 
-      // return res.status(400).send(errors.array());
+    // const errors = validationResult(req);
+    // if (!errors.isEmpty()) {
+    //   // set the error status to 400, and send an array of errors back to client as JSON data
 
-      // throw new Error("Invalid email or password");
-      throw new RequestValidationError(errors.array());
-    }
+    //   // return res.status(400).send(errors.array());
+
+    //   // throw new Error("Invalid email or password");
+    //   throw new RequestValidationError(errors.array());
+    // }
     // validate the email and password -- now use a libaray to provide the functionality
     const { email, password } = req.body;
 

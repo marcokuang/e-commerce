@@ -107,6 +107,8 @@ The auth service has a root controller for handling Signup, Signin, Signout, cur
 
   * Use the secret in code: `process.env.JWT_KEY` and make sure use type guard to avoid undefined errors. Use `kubectl describe secret <name of secret> ` to inspect the defined secret.
 
+* Use Express middleware to handle the common request validation for emails and password, etc.
+
 ## MongoDB
 
 MongoDB organize information into different collections.
@@ -133,7 +135,33 @@ Data types in Schema:
 
 > `pre('save', cb)` method will be called when user.save() is called every time
 
+Format the JSON properties using Mongoose Schema options when we need to remove some sensitive information or return a custom object.
 
+* Use `toJSON()` and `transform` option to modify the returned object from the query.
+
+* Since JSON.stringify() method will look for the toJSON() method if supplied in the object to get a string representation of the object, we can use `transform` function to apply the formats before returning.
+
+* ```javascript
+  const userSchema = new mongoose.Schema(
+    {
+      email: {
+        type: String,
+        required: true,
+      },
+    },
+    {
+      toJSON: {
+        transform(doc, ret) {
+          delete ret.__v;
+          ret.id = ret._id;
+          delete ret._id;
+        },
+      },
+    }
+  );
+  ```
+
+* 
 
 
 
@@ -184,3 +212,5 @@ console.log(testClass.city);
   * Think of these `<T, U>` as being some arguments to the function of model
 * Tell TS to manually specify the type of the variable: `const buff = (await scryptAsync(*password*, salt, 64)) as Buffer`. Now the `buff` will be recognized as `Buffer` type
   * Also, use `!` after a variable name to tell TS that the variable is already defined. e.g. `process.env.JWT_KEY!`
+* `toJSON()`
+  * In JavaScript, the [`JSON.stringify()` function looks for functions named `toJSON` in the object being serialized. If an object has a `toJSON` function, `JSON.stringify()` calls `toJSON()` and serializes the return value from `toJSON()` instead.
