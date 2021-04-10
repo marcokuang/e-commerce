@@ -1,5 +1,7 @@
 import express, { Request, Response } from "express";
 import { body, validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
+
 import { RequestValidationError } from "../errors/request-validation-error";
 import { BadRequestError } from "../errors/bad-request-error";
 import { DatabaseConnectionError } from "../errors/database-connection-errors";
@@ -42,7 +44,18 @@ router.post(
     // save user to DB
     await user.save();
 
-    console.log("Creating a user now.");
+    // Generate JWT, which includes the user ID, and email
+    const userJwtToken = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      "MY_TOP_SECRET"
+    );
+
+    // Store it on session object
+    // the Cookie-session library will take this req.session object, serialize it, and send back to user's browser
+    req.session = { jwt: userJwtToken };
 
     res.status(201).send(user);
   }
