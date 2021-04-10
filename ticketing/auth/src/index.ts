@@ -37,6 +37,11 @@ app.use(errorHandler);
 
 // set up mongoDB connection with mongoose
 const start = async () => {
+  // check if the secret key JWT_KEY is defined or not
+  if (!process.env.JWT_KEY) {
+    throw new Error("ENV VAR JWT_KEY must be defined");
+  }
+
   try {
     await mongoose.connect("mongodb://auth-mongo-srv:27017/auth", {
       useNewUrlParser: true,

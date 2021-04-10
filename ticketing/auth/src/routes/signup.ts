@@ -50,7 +50,7 @@ router.post(
         id: user.id,
         email: user.email,
       },
-      "MY_TOP_SECRET"
+      process.env.JWT_KEY!
     );
 
     // Store it on session object
