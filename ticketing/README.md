@@ -167,9 +167,10 @@ Format the JSON properties using Mongoose Schema options when we need to remove 
   );
   ```
 
-* 
 
+Mongodb-momory-server --- npm package
 
+It allows setting up Mongodb in memory for fast tests, and it’s able to run multiple instances.
 
 ## Password Hashing
 
@@ -242,4 +243,72 @@ console.log(testClass.city);
     }
     ```
 
-  * 
+## Testing with Microservices
+
+Define the testing scope: --> from small scale to bigger scale
+
+1. Test a single piece of code in isolation (Unit test)
+
+   Single middleware
+
+2. Test how different pieces of code work together  
+
+   Request flowing through multiple middlewares to a request handler
+
+3. Test how different components work together
+
+   Make request to service, ensure write to DB was completed
+
+4. Test how different services work together
+
+   Creating a ‘payment’ at the ‘payments’ service should affect the ‘orders‘ service
+
+One option is to run the test directly from the terminal. --> `npm start test`
+
+* Use Jest to run the test scripts
+
+***Define Environment variable*** in the test environment, especially running it locally in terminal with Jest
+
+* Directly set it in the `beforeAll()` function if using Jest
+
+### Jest
+
+The following approach will be used to test the microservice
+
+* start in-memory copy of MongoDB
+* start up the Express app
+* use ***supertest*** library to make fake requests to the express app
+* run **assertions** to make sure the request did the right thing
+
+Setup functions in Jest
+
+* *hook function: `beforeAll()` will be executed before all test suites start*
+* *`beforeEach()` will be executed before each test starts*
+* *clean up function, `afterAll()`, will be executed after the tests finish.*
+* Naming conventions: in each folder, create a `__test__`  folder to store test files with the name `<test-name>.test.ts`
+* Setup config should be saved in `/src/test/setup.ts` file
+
+### Supertest
+
+Supertest provides a high-level abstraction for testing HTTP. It can be used with any test framework like Jest, and mocha
+
+```javascript
+const request = require('supertest');
+const express = require('express');
+
+const app = express();
+
+app.get('/user', function(req, res) {
+  res.status(200).json({ name: 'john' });
+});
+
+request(app)
+  .get('/user')
+  .expect('Content-Type', /json/)
+  .expect('Content-Length', '15')
+  .expect(200)
+  .end(function(err, res) {
+    if (err) throw err;
+  });
+```
+
