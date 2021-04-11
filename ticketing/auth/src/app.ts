@@ -20,7 +20,7 @@ app.use(
     // signed is to encrypt the cookie; since JWT is tampering-safe, we will save as is.
     signed: false,
     // secure makes sure the cookie is sent over HTTPS
-    secure: true,
+    secure: process.env.NODE_ENV !== "test",
   })
 );
 

@@ -271,6 +271,11 @@ One option is to run the test directly from the terminal. --> `npm start test`
 
 * Directly set it in the `beforeAll()` function if using Jest
 
+Need to differentiate the secure HTTP access rules in test environment -> Supertest is not sending HTTP request in a secure channel, which means it’s not sending over HTTPS. We need to figure out how to make a secure request in test env or change the secure request option in the code to false.
+
+* Set the cookieSession option in test environment to `{secure: false}`  is the most time-effective way.
+* in `app` component, change the `{secure: process.env.NODE_ENV_VAR}` in cookie session.
+
 ### Jest
 
 The following approach will be used to test the microservice
@@ -293,22 +298,44 @@ Setup functions in Jest
 Supertest provides a high-level abstraction for testing HTTP. It can be used with any test framework like Jest, and mocha
 
 ```javascript
-const request = require('supertest');
-const express = require('express');
+import request from "supertest";
+import { app } from "../../app";
 
-const app = express();
-
-app.get('/user', function(req, res) {
-  res.status(200).json({ name: 'john' });
+it("fails when a email that does not exist is supplied", async () => {
+  await request(app)
+    .post("/api/users/signin")
+    .send({
+      email: "test@test.com",
+      password: "password",
+    })
+    .expect(400);
 });
-
-request(app)
-  .get('/user')
-  .expect('Content-Type', /json/)
-  .expect('Content-Length', '15')
-  .expect(200)
-  .end(function(err, res) {
-    if (err) throw err;
-  });
 ```
+
+> NOTE: supertest by default is not configured to manage cookies automatically
+
+Cookie with Supertest
+
+* Extract the cookie from the previous request and save it to a variable
+* Then use `.set()` method to set `{Cookie: myCookie}` to the next request before calling the `.send()` method
+
+
+
+## NextJS
+
+Basic components:
+
+* Pages are special NextJS  React components  in the `pages` directory. Each page is associated with a route based on its file name. ---> `/about` is tied to `/pages/about.js`; `/` is associated with `/pages/index.js`
+
+  * ```javascript
+    //Example: If you create pages/about.js that exports a React component like below, it will be accessible at /about.
+    
+    function About() {
+      return <div>About</div>
+    }
+    
+    export default About
+    ```
+
+* 
 
