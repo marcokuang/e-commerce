@@ -107,7 +107,13 @@ The auth service has a root controller for handling Signup, Signin, Signout, cur
 
   * Use the secret in code: `process.env.JWT_KEY` and make sure use type guard to avoid undefined errors. Use `kubectl describe secret <name of secret> ` to inspect the defined secret.
 
-* Use Express middleware to handle the common request validation for emails and password, etc.
+* Extract middlewares
+
+  * Use Express middleware to handle the common request validation for emails and password, etc.
+  * Remember, middleware will throw error early if the request has failed the validation.
+    * The order of the middlewares in the Express Routes are preserved.
+  * Use middleware to extract JWT payload and set it on `req.currentUser`
+  * Use middleware to reject the request if the user is not logged in
 
 ## MongoDB
 
@@ -208,9 +214,32 @@ console.log(testClass.city);
   * Difference: TS interface does not exist at runtime, TS abstract class exists at runtime, yet it's an incomplete implementation
     * Can use `instanceof` checks: TS abstract class will create a class object when translated to JS
   * Summary: Always reach out for interfaces first, and use abstract classes when we want to "inject" functionality to a similar class
+  
 * Generics in TS
+  
   * Think of these `<T, U>` as being some arguments to the function of model
+  
 * Tell TS to manually specify the type of the variable: `const buff = (await scryptAsync(*password*, salt, 64)) as Buffer`. Now the `buff` will be recognized as `Buffer` type
+  
   * Also, use `!` after a variable name to tell TS that the variable is already defined. e.g. `process.env.JWT_KEY!`
+  
 * `toJSON()`
+  
   * In JavaScript, the [`JSON.stringify()` function looks for functions named `toJSON` in the object being serialized. If an object has a `toJSON` function, `JSON.stringify()` calls `toJSON()` and serializes the return value from `toJSON()` instead.
+  
+* When introducing new property on object with existing types, augment the definition of the existing type by a `declare` block.
+
+  * ```typescript
+    /**
+     * Augment/update the existing Request type by using a declare block.
+     */
+    declare global{
+      namespace Express{
+        interface Request {
+          currentUser?: UserPayload;
+        }
+      }
+    }
+    ```
+
+  * 
