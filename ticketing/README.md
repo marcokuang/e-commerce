@@ -337,5 +337,44 @@ Basic components:
     export default About
     ```
 
-* 
+Global CSS - [Basic Features: Built-in CSS Support | Next.js (nextjs.org)](https://nextjs.org/docs/basic-features/built-in-css-support)
+
+* NextJS will not take CSS import from the page js files. Instead, we have to import the global CSS file in the `_app.js` file, which behind the scene will create a custom app component.
+
+Adding Component-Level CSS
+
+* Next.js supports [CSS Modules](https://github.com/css-modules/css-modules) using the `[name].module.css` file naming convention.
+
+* CSS Modules locally scope CSS by automatically creating a **unique class name**. Therefore there will be no name collisions.
+
+* You can use component-level Sass via CSS Modules and the `.module.scss` or `.module.sass` extension.
+
+  * Config the `next.config.js` file with example below:
+
+  * ```javascript
+    const path = require('path')
+    
+    module.exports = {
+      sassOptions: {
+        includePaths: [path.join(__dirname, 'styles')],
+      },
+    }
+    ```
+
+Data fetching
+
+​	Requests from the Component always issued from client. 
+
+* Unique Next.js functions you can use to fetch data for pre-rendering:
+  * [`getStaticProps`](https://nextjs.org/docs/basic-features/data-fetching#getstaticprops-static-generation) (Static Generation): Fetch data at **build time**.
+    * You should use `getStaticProps` if:
+      - The data required to render the page is available at build time ahead of a user’s request.
+      - The data comes from a headless CMS.
+      - The data can be publicly cached (not user-specific).
+      - The page must be pre-rendered (for SEO) and be very fast — `getStaticProps` generates HTML and JSON files, both of which can be cached by a CDN for performance.
+  * [`getStaticPaths`](https://nextjs.org/docs/basic-features/data-fetching#getstaticpaths-static-generation) (Static Generation): Specify [dynamic routes](https://nextjs.org/docs/routing/dynamic-routes) to pre-render pages based on data.
+  * [`getServerSideProps`](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering) (Server-side Rendering): Fetch data on **each request**.
+  * `getInitialProps` enables [server-side rendering](https://nextjs.org/docs/basic-features/pages#server-side-rendering) in a page and allows you to do **initial data population**, it means sending the [page](https://nextjs.org/docs/basic-features/pages) with the data already populated from the server. This is especially useful for [SEO](https://en.wikipedia.org/wiki/Search_engine_optimization).
+
+> Note: we cannot fetch data inside the component during the SSR process. We can only fetch data from inside of `getInitialProps()`
 
